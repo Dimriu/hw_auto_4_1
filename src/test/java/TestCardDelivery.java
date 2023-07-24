@@ -1,4 +1,4 @@
-import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import static com.codeborne.selenide.Condition.exactText;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.withText;
 import static com.codeborne.selenide.Selenide.$;
@@ -15,7 +14,6 @@ import static com.codeborne.selenide.Selenide.open;
 public class TestCardDelivery {
     @BeforeEach
     void setUp() {
-        Configuration.headless = true;
         open("http://localhost:9999");
     }
 
@@ -25,7 +23,6 @@ public class TestCardDelivery {
 
     @Test
     public void shouldTestV1() {
-
         $("[data-test-id='city'] .input__control").setValue("Симферополь");
         $("[data-test-id='date'] .input__control").doubleClick().sendKeys(Keys.BACK_SPACE);;
         $("[data-test-id='date'] .input__control").setValue(generateDate(3, "dd.MM.yyyy"));
@@ -34,7 +31,9 @@ public class TestCardDelivery {
         $("[data-test-id=agreement]").click();
         $(".button").click();
         $(withText("Успешно!")).shouldBe(visible, Duration.ofMillis(15000));
-        $(withText("Встреча успешно забронирована на " + generateDate(3, "dd.MM.yyyy")));
+        $("[data-test-id='notification'] .notification__content")
+                .shouldHave(Condition.text("Встреча успешно забронирована на " + generateDate(3, "dd.MM.yyyy")), Duration.ofSeconds(15))
+                .shouldBe(Condition.visible);
     }
 
     @Test
@@ -47,6 +46,9 @@ public class TestCardDelivery {
         $("[data-test-id=agreement]").click();
         $(".button").click();
         $(withText("Доставка в выбранный город недоступна")).shouldBe(visible);
+        $("[data-test-id='city'] .input__sub")
+                .shouldHave(Condition.text("Доставка в выбранный город недоступна"))
+                .shouldBe(Condition.visible);
     }
 
     @Test
@@ -58,7 +60,9 @@ public class TestCardDelivery {
         $("[data-test-id='phone'] [name='phone']").setValue("+79787811804");
         $("[data-test-id=agreement]").click();
         $(".button").click();
-        $(withText("Заказ на выбранную дату невозможен")).shouldBe(visible);
+        $("[data-test-id='date'] .input__sub")
+                .shouldHave(Condition.text("Заказ на выбранную дату невозможен"))
+                .shouldBe(Condition.visible);
     }
 
     @Test
@@ -70,7 +74,9 @@ public class TestCardDelivery {
         $("[data-test-id='phone'] [name='phone']").setValue("+79787811804");
         $("[data-test-id=agreement]").click();
         $(".button").click();
-        $(withText("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.")).shouldBe(visible);
+        $("[data-test-id='name'] .input__sub")
+                .shouldHave(Condition.text("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы."))
+                .shouldBe(Condition.visible);
     }
 
     @Test
@@ -82,7 +88,9 @@ public class TestCardDelivery {
         $("[data-test-id='phone'] [name='phone']").setValue("++7978781180");
         $("[data-test-id=agreement]").click();
         $(".button").click();
-        $(withText("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.")).shouldBe(visible);
+        $("[data-test-id='phone'] .input__sub")
+                .shouldHave(Condition.text("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."))
+                .shouldBe(Condition.visible);
     }
 
     @Test
@@ -94,7 +102,9 @@ public class TestCardDelivery {
         $("[data-test-id='phone'] [name='phone']").setValue("+79787811804");
         $("[data-test-id=agreement]").click();
         $(".button").click();
-        $(withText("Поле обязательно для заполнения")).shouldBe(visible);
+        $("[data-test-id='name'] .input__sub")
+                .shouldHave(Condition.text("Поле обязательно для заполнения"))
+                .shouldBe(Condition.visible);
     }
 
     @Test
@@ -106,7 +116,9 @@ public class TestCardDelivery {
         $("[data-test-id='phone'] [name='phone']").setValue("");
         $("[data-test-id=agreement]").click();
         $(".button").click();
-        $(withText("Поле обязательно для заполнения")).shouldBe(visible);
+        $("[data-test-id='phone'] .input__sub")
+                .shouldHave(Condition.text("Поле обязательно для заполнения"))
+                .shouldBe(Condition.visible);
     }
 
     @Test
@@ -117,8 +129,9 @@ public class TestCardDelivery {
         $("[data-test-id='name'] [name='name']").setValue("Тест-Один Дмитрий");
         $("[data-test-id='phone'] [name='phone']").setValue("+79787811804");
         $(".button").click();
-        $("[data-test-id='agreement'].input_invalid .checkbox__text").shouldBe(visible)
-                .shouldBe(exactText("Я соглашаюсь с условиями обработки и использования моих персональных данных"));
+        $("[data-test-id='agreement'].input_invalid .checkbox__text")
+                .shouldHave(Condition.text("Я соглашаюсь с условиями обработки и использования моих персональных данных"))
+                .shouldBe(Condition.visible);
     }
 
 }
